@@ -22,6 +22,7 @@
   "homepage": "https://github.com/maheshshinde9100/hcltech-amplified-r2-project#readme",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.5.0",
     "next": "^16.3.2",
