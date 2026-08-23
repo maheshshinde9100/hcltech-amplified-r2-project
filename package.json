@@ -1,0 +1,35 @@
+{
+  "name": "hcltech-amplified-r2-project",
+  "version": "1.0.0",
+  "description": "Built for HCLTech Amplified Hackathon — Round 2",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maheshshinde9100/hcltech-amplified-r2-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/maheshshinde9100/hcltech-amplified-r2-project/issues"
+  },
+  "homepage": "https://github.com/maheshshinde9100/hcltech-amplified-r2-project#readme",
+  "dependencies": {
+    "next": "^16.3.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.2",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3"
+  }
+}
