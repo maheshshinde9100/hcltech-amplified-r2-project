@@ -1,13 +1,24 @@
 import { NextResponse } from 'next/server';
+import { getSessionUser } from '@/lib/auth';
+import { getDb } from '@/lib/mongodb';
 
 export async function GET() {
-  return NextResponse.json({ stub: true });
-}
+  try {
+    const user = await getSessionUser();
+    if (!user) return NextResponse.json({ error: true, message: 'Not authenticated' }, { status: 401 });
 
-export async function POST() {
-  return NextResponse.json({ stub: true });
-}
+    const db = await getDb();
+    const path = await db.collection('learning_paths').findOne(
+      { learnerId: user.id, status: 'active' },
+      { sort: { createdAt: -1 } }
+    );
 
-export async function PATCH() {
-  return NextResponse.json({ stub: true });
+    if (!path) return NextResponse.json({ path: null });
+
+    return NextResponse.json({
+      path: { ...path, _id: path._id.toString() }
+    });
+  } catch (error) {
+    return NextResponse.json({ error: true, message: error.message }, { status: 500 });
+  }
 }
