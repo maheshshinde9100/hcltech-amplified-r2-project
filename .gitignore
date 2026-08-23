@@ -1,5 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+team.txt
+PROJECT.md 
+PROMPT.md 
+diagrams.md
 # dependencies
 /node_modules
 /.pnp
