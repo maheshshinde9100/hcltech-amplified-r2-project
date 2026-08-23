@@ -1,3 +1,6 @@
 export default function Home() {
-  return <div>Welcome to the Learning Path Recommender</div>;
+  return <div className="text-3xl font-bold underline">Welcome to the Learning Path Recommender...
+  <br></br>
+  Project is under working...
+  </div>;
 }
