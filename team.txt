@@ -1,0 +1,243 @@
+HCLTech Amplified Hackathon — Round 2
+AI-Powered Personalized Learning Path Recommender
+TEAM ISSUE / FEATURE BREAKDOWN (Next.js + vanilla JS edition)
+======================================================================
+
+Stack: Next.js 14+ (App Router, JavaScript — no TypeScript), MongoDB
+Atlas, Groq/Gemini free LLM API, deployed 100% on Vercel.
+
+Team roles (assign real names against these slots as GitHub Assignees):
+
+  M1 - Mahesh        -> Repo/Infra Lead + Auth + Profile API routes
+  M2 - Member 2       -> AI Lead (LLM client, goal parsing, skill-gap,
+                          recommendation, path generation, explanations)
+  M3 - Member 3       -> Frontend: onboarding chat UI + auth pages
+  M4 - Member 4       -> Frontend: roadmap visualization + dashboard
+  M5 - Member 5       -> Data seeding + Progress/Milestone API routes +
+                          deployment + docs/demo
+
+----------------------------------------------------------------------
+ISSUE #1
+Title: [Setup] Next.js app scaffolding + CI
+Assignee: M1 - Mahesh
+Description:
+  Create the Next.js app with `create-next-app` (App Router, JavaScript,
+  Tailwind CSS, ESLint, src/ directory). Set up folder structure:
+  app/(pages), app/api/(route handlers), lib/, components/, models/.
+  Add .env.local.example (MONGODB_URI, JWT_SECRET, GROQ_API_KEY,
+  GEMINI_API_KEY). Add lib/mongodb.js with a cached MongoClient
+  connection helper (required for serverless — avoid reconnecting per
+  request). Add a GitHub Actions workflow that runs `npm run build` and
+  `npm run lint` on every push/PR. Push incremental commits.
+Labels: setup, priority-high
+
+----------------------------------------------------------------------
+ISSUE #2
+Title: [API] Auth routes (JWT register/login)
+Assignee: M1 - Mahesh
+Description:
+  Implement app/api/auth/register/route.js, app/api/auth/login/route.js,
+  app/api/auth/me/route.js. Use bcryptjs for password hashing and
+  jsonwebtoken for signing/verifying JWTs (stored as an httpOnly
+  cookie). Store learners in a MongoDB "learners" collection. Add
+  lib/auth.js with getSessionUser(request) helper for protected routes.
+Labels: api, auth, priority-high
+
+----------------------------------------------------------------------
+ISSUE #3
+Title: [API] Learner profile routes
+Assignee: M1 - Mahesh
+Description:
+  app/api/profile/route.js — GET (current learner's profile), POST
+  (create), PATCH (update). Fields: interests[], experienceLevel,
+  completedCourses[], careerGoal, learningStyle, timeframe. Persist to
+  "learner_profiles" collection keyed by learnerId. Validate input
+  with a simple manual validator or zod (JS, no TS needed).
+Labels: api, priority-high
+
+----------------------------------------------------------------------
+ISSUE #4
+Title: [Data] Course/resource catalog + seed script
+Assignee: M5 - Member 5
+Description:
+  Write scripts/seedResources.mjs (plain Node script, run with
+  `node scripts/seedResources.mjs`) that populates a MongoDB
+  "resources" collection with 150-250 items across 4 domains (Web Dev,
+  Data Science, DSA/Backend, Cloud/DevOps): {title, type, url,
+  difficulty, topics[], estimatedHours, prerequisites[]}. Source from
+  free resources (freeCodeCamp, MDN, roadmap.sh, official docs, known
+  YouTube playlists). Also create lib/skillTaxonomy.js exporting a
+  topic-prerequisite graph per domain, used by the skill-gap logic.
+Labels: data, priority-high
+
+----------------------------------------------------------------------
+ISSUE #5
+Title: [AI] LLM client wrapper
+Assignee: M2 - Member 2
+Description:
+  lib/llmClient.js — a function `askLLM(systemPrompt, userPrompt,
+  { jsonMode })` that calls the Groq chat completions REST API
+  (model llama-3.1-8b-instant or similar free-tier model) via fetch,
+  with GEMINI_API_KEY as a fallback provider if the Groq call fails or
+  times out. When jsonMode is true, instruct the model to return only
+  valid JSON, parse it, and retry once with a "return only valid JSON"
+  correction message on parse failure.
+Labels: ai-ml, priority-high
+
+----------------------------------------------------------------------
+ISSUE #6
+Title: [API] Goal parser route (conversational onboarding)
+Assignee: M2 - Member 2
+Description:
+  app/api/ai/parse-goal/route.js — POST {message, sessionId,
+  knownFields}. Uses llmClient in jsonMode to extract {goal, domain,
+  targetRole, experienceLevel, interests[], timeframe, missingFields[]}
+  from free text, plus a natural-language followUpQuestion when fields
+  are missing. Upsert partial profile fields to learner_profiles as
+  they're extracted.
+Labels: ai-ml, api, priority-high
+
+----------------------------------------------------------------------
+ISSUE #7
+Title: [API] Skill-gap analyzer route
+Assignee: M2 - Member 2
+Description:
+  app/api/ai/skill-gap/route.js — POST {domain, experienceLevel,
+  completedCourses, goal}. Uses lib/skillTaxonomy.js to compute missing
+  topics in prerequisite order (topological sort, pure JS function in
+  lib/skillGraph.js — unit-testable, no LLM call needed here).
+Labels: ai-ml, api, priority-high
+
+----------------------------------------------------------------------
+ISSUE #8
+Title: [API] Recommendation engine route
+Assignee: M2 - Member 2
+Description:
+  app/api/ai/recommend/route.js — POST {missingTopics, experienceLevel,
+  learningStyle}. Query MongoDB "resources", score by topic overlap
+  (primary), difficulty match (secondary), type diversity bonus. Pure
+  scoring function in lib/recommender.js. Return top N resources per
+  topic.
+Labels: ai-ml, api, priority-high
+
+----------------------------------------------------------------------
+ISSUE #9
+Title: [API] Path generator route
+Assignee: M2 - Member 2
+Description:
+  app/api/ai/generate-path/route.js — POST {learnerId, goal,
+  missingTopicsWithResources}. Topologically order milestones, call
+  llmClient once (batched) to generate friendly titles/descriptions per
+  milestone, persist to "learning_paths" + "milestones" collections,
+  return the full roadmap JSON.
+Labels: ai-ml, api, priority-high
+
+----------------------------------------------------------------------
+ISSUE #10
+Title: [API] Explanation & Q&A route
+Assignee: M2 - Member 2
+Description:
+  app/api/ai/explain/route.js — POST {learnerId, milestoneId,
+  question?}. Fetch only the relevant profile + milestone + resources
+  from MongoDB (grounded context, not the whole DB), ask the LLM for a
+  short explanation or answer (under 120 words), referencing a real
+  fact from the learner's profile.
+Labels: ai-ml, api, priority-medium
+
+----------------------------------------------------------------------
+ISSUE #11
+Title: [API] Progress + milestone status routes
+Assignee: M5 - Member 5
+Description:
+  app/api/progress/route.js — GET aggregated stats (percent complete,
+  skills gained, current milestone, next action) for the current
+  learner. app/api/milestone/[id]/status/route.js — PATCH {status,
+  feedback}. On "struggling" or negative feedback, call
+  /api/ai/generate-path server-side (internal fetch or shared function)
+  to regenerate only the remaining (incomplete) milestones.
+Labels: api, priority-high
+
+----------------------------------------------------------------------
+ISSUE #12
+Title: [Frontend] Conversational onboarding chat UI
+Assignee: M3 - Member 3
+Description:
+  app/onboarding/page.jsx (Client Component) — chat interface posting
+  to /api/ai/parse-goal, displaying follow-up questions and a profile
+  completeness bar. On completion, POST /api/profile then trigger
+  /api/ai/skill-gap -> /api/ai/recommend -> /api/ai/generate-path in
+  sequence (or a single orchestrating route, see Issue #13), then
+  router.push('/roadmap'). Components: ChatBubble.jsx, ChatInput.jsx,
+  TypingIndicator.jsx.
+Labels: frontend, priority-high
+
+----------------------------------------------------------------------
+ISSUE #13
+Title: [API] Orchestration route for full path generation
+Assignee: M1 - Mahesh
+Description:
+  app/api/path/generate/route.js — POST (no body needed, uses session).
+  Server-side, calls the skill-gap, recommend, and generate-path logic
+  in sequence as plain function calls (import the handler logic from
+  lib/, not HTTP fetches to itself) for lower latency, persists and
+  returns the final roadmap. app/api/path/route.js — GET current
+  learner's active learning path + milestones.
+Labels: api, priority-high
+
+----------------------------------------------------------------------
+ISSUE #14
+Title: [Frontend] Roadmap visualization
+Assignee: M4 - Member 4
+Description:
+  app/roadmap/page.jsx using React Flow (npm i reactflow): render
+  milestones as nodes in topological order with prerequisite edges,
+  status-based node colors (locked/in-progress/completed). Clicking a
+  node opens a side panel with its resources + calls /api/ai/explain
+  for the "why recommended" text, plus a small Q&A input for that
+  milestone.
+Labels: frontend, priority-high
+
+----------------------------------------------------------------------
+ISSUE #15
+Title: [Frontend] Progress dashboard
+Assignee: M4 - Member 4
+Description:
+  app/dashboard/page.jsx — fetch /api/progress, render completion %
+  (progress ring), skills-gained bar chart (recharts), milestone
+  timeline stepper, "next recommended action" card linking into the
+  roadmap at that milestone.
+Labels: frontend, priority-medium
+
+----------------------------------------------------------------------
+ISSUE #16
+Title: [Frontend] Auth pages, profile settings, layout
+Assignee: M3 - Member 3
+Description:
+  app/login/page.jsx, app/register/page.jsx, app/settings/page.jsx
+  (edit profile manually), components/Navbar.jsx,
+  components/ProtectedRoute.jsx (or middleware.js checking the JWT
+  cookie for protected routes). Shared root layout.jsx with Tailwind
+  styling.
+Labels: frontend, priority-medium
+
+----------------------------------------------------------------------
+ISSUE #17
+Title: [QA/Deploy] Integration testing, deployment, docs, demo
+Assignee: M5 - Member 5 (with support from all)
+Description:
+  Test the full flow end-to-end (register -> onboarding -> roadmap ->
+  progress -> struggling -> re-plan). Deploy to Vercel (connect GitHub
+  repo, set env vars in Vercel dashboard: MONGODB_URI, JWT_SECRET,
+  GROQ_API_KEY, GEMINI_API_KEY). Set up MongoDB Atlas free M0 cluster
+  and whitelist 0.0.0.0/0. Write the Solution Documentation PDF/PPT and
+  record the 3-5 min demo video.
+Labels: qa, deployment, docs, priority-high
+
+======================================================================
+Suggested GitHub setup:
+- Create these as Issues, one per row above, with the Assignee set.
+- Labels: setup / api / ai-ml / frontend / data / qa / deployment / docs,
+  plus priority-high / priority-medium.
+- Milestones: "M1: Scaffold + Auth + Data", "M2: AI Pipeline + Path
+  Generation", "M3: Frontend + Adaptive Loop + Deploy".
+- Kanban board: Todo / In Progress / Review / Done.
