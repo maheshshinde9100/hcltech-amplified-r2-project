@@ -19,6 +19,7 @@ const STATUS_COLORS = {
   completed:   '#22C55E',
   in_progress: '#6C63FF',
   not_started: '#2E2C46',
+  struggling:  '#EF4444',
 };
 
 export default function DashboardPage() {
@@ -60,25 +61,36 @@ export default function DashboardPage() {
     })();
   }, []);
 
-  const handleMilestoneUpdate = async (milestoneId, newStatus) => {
+  const handleMilestoneUpdate = async (milestoneId, newStatus, feedback = '') => {
     setUpdatingId(milestoneId);
     try {
       const res = await fetch(`/api/milestone/${milestoneId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, feedback }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.message);
 
-      setPath(p => ({
-        ...p,
-        milestones: p.milestones.map(m =>
-          m.id === milestoneId ? { ...m, status: newStatus } : m
-        ),
-      }));
-      setProgress(p => ({ ...p, progressPercent: data.progressPercent }));
-      showToast(newStatus === 'completed' ? '🎉 Milestone completed!' : '📌 Status updated', 'success');
+      if (data.reGenerated) {
+        showToast('🎯 Path has been adaptively regenerated for you!', 'info');
+        const pathRes = await fetch('/api/path');
+        const pathData = await pathRes.json();
+        setPath(pathData.path);
+        
+        const progRes = await fetch('/api/progress');
+        const progData = await progRes.json();
+        setProgress(progData);
+      } else {
+        setPath(p => ({
+          ...p,
+          milestones: p.milestones.map(m =>
+            m.id === milestoneId ? { ...m, status: newStatus } : m
+          ),
+        }));
+        setProgress(p => ({ ...p, progressPercent: data.progressPercent }));
+        showToast(newStatus === 'completed' ? '🎉 Milestone completed!' : '📌 Status updated', 'success');
+      }
     } catch (e) {
       showToast(e.message, 'error');
     } finally {
@@ -320,7 +332,14 @@ export default function DashboardPage() {
                         <select
                           id={`status-select-${m.id || i}`}
                           value={status}
-                          onChange={e => handleMilestoneUpdate(m.id, e.target.value)}
+                          onChange={e => {
+                            if (e.target.value === 'struggling') {
+                              const fb = prompt("What are you struggling with? (e.g. 'too hard', 'need more basics')");
+                              if (fb !== null) handleMilestoneUpdate(m.id, e.target.value, fb);
+                            } else {
+                              handleMilestoneUpdate(m.id, e.target.value);
+                            }
+                          }}
                           style={{
                             padding: '7px 12px', borderRadius: 8,
                             background: 'var(--surface-4)', border: '1px solid var(--border)',
@@ -330,6 +349,7 @@ export default function DashboardPage() {
                           <option value="not_started">Not Started</option>
                           <option value="in_progress">In Progress</option>
                           <option value="completed">Completed</option>
+                          <option value="struggling">🆘 Struggling</option>
                         </select>
                       )
                     }
