@@ -13,6 +13,7 @@ const STATUS_STYLE = {
   completed:   { border: '1.5px solid #22C55E', background: 'rgba(34,197,94,0.08)', icon: '✅' },
   in_progress: { border: '1.5px solid #6C63FF', background: 'rgba(108,99,255,0.10)', icon: '⚡' },
   not_started: { border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(46,44,70,0.6)', icon: '🔒' },
+  struggling:  { border: '1.5px solid #EF4444', background: 'rgba(239,68,68,0.1)', icon: '🆘' },
 };
 
 const TYPE_COLOR = {
@@ -122,23 +123,33 @@ export default function RoadmapPage() {
     })();
   }, []);
 
-  const handleStatusUpdate = async (milestoneId, newStatus) => {
+  const handleStatusUpdate = async (milestoneId, newStatus, feedback = '') => {
     try {
       const res = await fetch(`/api/milestone/${milestoneId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, feedback }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.message);
 
-      setPath(p => {
-        const updated = { ...p, milestones: p.milestones.map(m => m.id === milestoneId ? { ...m, status: newStatus } : m) };
-        buildGraph(updated.milestones);
-        return updated;
-      });
-      setSelectedMilestone(m => m ? { ...m, status: newStatus } : m);
-      showToast(newStatus === 'completed' ? '🎉 Milestone completed!' : '📌 Status updated', 'success');
+      if (data.reGenerated) {
+        showToast('🎯 Path has been adaptively regenerated for you!', 'info');
+        // Fetch fresh path
+        const pathRes = await fetch('/api/path');
+        const pathData = await pathRes.json();
+        setPath(pathData.path);
+        buildGraph(pathData.path.milestones);
+        setSelectedMilestone(null);
+      } else {
+        setPath(p => {
+          const updated = { ...p, milestones: p.milestones.map(m => m.id === milestoneId ? { ...m, status: newStatus } : m) };
+          buildGraph(updated.milestones);
+          return updated;
+        });
+        setSelectedMilestone(m => m ? { ...m, status: newStatus } : m);
+        showToast(newStatus === 'completed' ? '🎉 Milestone completed!' : '📌 Status updated', 'success');
+      }
     } catch (e) {
       showToast(e.message, 'error');
     }
@@ -273,11 +284,18 @@ export default function RoadmapPage() {
               <div>
                 <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Update Status</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {['not_started', 'in_progress', 'completed'].map(s => (
+                  {['not_started', 'in_progress', 'completed', 'struggling'].map(s => (
                     <button
                       key={s}
                       id={`roadmap-status-${s}`}
-                      onClick={() => handleStatusUpdate(selectedMilestone.id, s)}
+                      onClick={() => {
+                        if (s === 'struggling') {
+                          const feedback = prompt("What are you struggling with? (e.g. 'too hard', 'need more basics')");
+                          if (feedback !== null) handleStatusUpdate(selectedMilestone.id, s, feedback);
+                        } else {
+                          handleStatusUpdate(selectedMilestone.id, s);
+                        }
+                      }}
                       style={{
                         padding: '10px 16px', borderRadius: 10, cursor: 'pointer',
                         background: selectedMilestone.status === s ? 'rgba(108,99,255,0.15)' : 'var(--surface-3)',
