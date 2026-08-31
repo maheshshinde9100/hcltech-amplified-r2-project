@@ -122,12 +122,16 @@ Generate 5–7 milestones. Keep descriptions concise.`,
     }).limit(40).toArray();
 
     // Distribute resources into matching milestones
-    const enrichedMilestones = (generatedPath.milestones || []).map(milestone => {
+    const enrichedMilestones = (generatedPath.milestones || []).map((milestone, index) => {
       const milestoneResources = resources
         .filter(r => r.topics.some(t => milestone.topics.includes(t)))
         .slice(0, 4)
         .map(r => ({ ...r, _id: r._id.toString() }));
-      return { ...milestone, resources: milestoneResources };
+      // Ensure each milestone has a unique ID
+      if (!milestone.id) {
+        milestone.id = `ms-${Date.now()}-${index}`;
+      }
+      return { ...milestone, resources: milestoneResources, status: 'not_started' };
     });
 
     // ─── Step 6: Persist the path in MongoDB ────────────────────────────────────

@@ -8,7 +8,7 @@ export async function PATCH(request, { params }) {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: true, message: 'Not authenticated' }, { status: 401 });
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const status = body.status;
     const feedback = body.feedback || '';
@@ -26,8 +26,40 @@ export async function PATCH(request, { params }) {
     if (!path) return NextResponse.json({ error: true, message: 'Active path not found' }, { status: 404 });
 
     const milestones = path.milestones || [];
-    const milestoneIndex = milestones.findIndex(m => m.id === id);
-    if (milestoneIndex === -1) return NextResponse.json({ error: true, message: 'Milestone not found' }, { status: 404 });
+    console.log('[Milestone Update] Looking for ID:', id);
+    console.log('[Milestone Update] Available milestones:', milestones.map(m => ({ id: m.id, title: m.title })));
+    
+    let milestoneIndex = milestones.findIndex(m => m.id === id);
+    
+    // Fallback 1: if ID not found, try parsing as array index
+    if (milestoneIndex === -1 && !isNaN(parseInt(id))) {
+      const index = parseInt(id);
+      if (index >= 0 && index < milestones.length) {
+        milestoneIndex = index;
+      }
+    }
+    
+    // Fallback 2: try extracting number from string IDs like 'm1', 'm2', 'ms-123-0'
+    if (milestoneIndex === -1) {
+      const match = id.match(/\d+/);
+      if (match) {
+        const extractedNum = parseInt(match[0]);
+        // Try as direct index first
+        if (extractedNum >= 0 && extractedNum < milestones.length) {
+          milestoneIndex = extractedNum;
+        } else {
+          // Try finding by matching the numeric part in existing IDs
+          milestoneIndex = milestones.findIndex(m => m.id && m.id.includes(match[0]));
+        }
+      }
+    }
+    
+    if (milestoneIndex === -1) {
+      console.log('[Milestone Update] Milestone not found after all fallbacks');
+      return NextResponse.json({ error: true, message: 'Milestone not found' }, { status: 404 });
+    }
+    
+    console.log('[Milestone Update] Found milestone at index:', milestoneIndex);
 
     let updatedMilestones = [...milestones];
     let reGenerated = false;

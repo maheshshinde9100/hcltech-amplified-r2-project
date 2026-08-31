@@ -55,7 +55,7 @@ export default function HomePage() {
 
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/register" className="btn-primary" id="hero-cta" style={{ padding: '16px 36px', fontSize: '1.05rem' }}>
-              <span style={{ position: 'relative', zIndex: 1 }}>🚀 Build My Learning Path</span>
+              <span style={{ position: 'relative', zIndex: 1 }}>Build My Learning Path</span>
             </Link>
             <Link href="/login" className="btn-secondary" id="hero-login" style={{ padding: '16px 36px', fontSize: '1.05rem' }}>
               Sign In →
@@ -65,7 +65,7 @@ export default function HomePage() {
 
         {/* Feature Pills */}
         <div style={{ marginTop: 64, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          {['🧠 AI Goal Parsing', '📊 Skill Gap Analysis', '🗺 Visual Roadmap', '📈 Progress Tracking', '🎯 Smart Recommendations'].map(f => (
+          {['AI Goal Parsing', 'Skill Gap Analysis', 'Visual Roadmap', 'Progress Tracking', 'Smart Recommendations'].map(f => (
             <div key={f} style={{
               padding: '9px 18px', borderRadius: 999,
               background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
@@ -79,15 +79,14 @@ export default function HomePage() {
       <section style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px 100px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
           {[
-            { icon: '🎯', title: 'Goal Parsing', desc: 'Describe your dream role in plain English. Our AI extracts domain, target role, required skills and timeline automatically.' },
-            { icon: '🔍', title: 'Skill Gap Analysis', desc: 'Tell us what you already know. We compute exactly what you\'re missing using a topological skill graph.' },
-            { icon: '🗺️', title: 'Visual Roadmap', desc: 'See your entire journey as an interactive node graph. Click any milestone to explore resources and update status.' },
-            { icon: '📚', title: 'Curated Resources', desc: 'AI selects the best articles, videos, and courses from our catalog — matched to your level and learning style.' },
-            { icon: '📊', title: 'Progress Dashboard', desc: 'Track completions, visualize weeks remaining, and get chart-based insights on your learning velocity.' },
-            { icon: '⚡', title: 'Lightning Fast', desc: 'Groq Llama 3 delivers sub-second AI responses. Gemini Flash as fallback ensures 99.9% availability.' },
+            { title: 'Goal Parsing', desc: 'Describe your dream role in plain English. Our AI extracts domain, target role, required skills and timeline automatically.' },
+            { title: 'Skill Gap Analysis', desc: 'Tell us what you already know. We compute exactly what you\'re missing using a topological skill graph.' },
+            { title: 'Visual Roadmap', desc: 'See your entire journey as an interactive node graph. Click any milestone to explore resources and update status.' },
+            { title: 'Curated Resources', desc: 'AI selects the best articles, videos, and courses from our catalog — matched to your level and learning style.' },
+            { title: 'Progress Dashboard', desc: 'Track completions, visualize weeks remaining, and get chart-based insights on your learning velocity.' },
+            { title: 'Lightning Fast', desc: 'Groq Llama 3 delivers sub-second AI responses. Gemini Flash as fallback ensures 99.9% availability.' },
           ].map((f, i) => (
             <div key={i} className="stat-card" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ fontSize: 32 }}>{f.icon}</div>
               <h3 className="font-display" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>{f.title}</h3>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>{f.desc}</p>
             </div>
