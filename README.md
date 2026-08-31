@@ -1,6 +1,6 @@
 # AI-Powered Personalized Learning Path Recommender
 
-Built for HCLTech Amplified Hackathon — Round 2
+Built for **HCLTech Amplified Hackathon — Round 2**
 
 Describe your learning goal in plain English. Get a personalized, explainable, prerequisite-aware learning roadmap — and watch it adapt as you progress.
 
@@ -11,13 +11,12 @@ Describe your learning goal in plain English. Get a personalized, explainable, p
 
 ## Problem
 
-Online learning platforms offer thousands of courses, but learners
-struggle to identify the *right sequence* of resources to reach a
-specific goal. This project turns a free-text goal statement into a
-structured, explainable, adaptive roadmap of courses, projects and
-milestones.
+Online learning platforms provide a large number of courses, but learners often struggle to identify:
 
-## Key Features
+* What to learn first
+* Which skills they are missing
+* Which resources are relevant
+* How different skills depend on each other
 
 - **Conversational onboarding** — describe your goal in natural language; the AI extracts your profile and asks clarifying questions.
 - **Learner profiling engine** — interests, experience level, completed courses, career goals, learning style.
@@ -27,7 +26,7 @@ milestones.
 - **Progress dashboard** — completion percentage, skills gained, milestone timeline, next recommended action.
 - **Adaptive re-planning** — mark a milestone as "struggling" and the AI regenerates the remaining path around it.
 
-## Architecture
+## Key Features
 
 ### System Architecture
 
@@ -163,104 +162,59 @@ graph LR
 
 ## Tech Stack
 
-| Layer          | Technology                                              |
-|----------------|----------------------------------------------------------|
-| Framework      | Next.js 14+ (App Router), **plain JavaScript** (no TypeScript) |
-| Styling        | Tailwind CSS                                              |
-| Data viz       | recharts (dashboard), reactflow (roadmap graph)           |
-| Auth           | JWT (jsonwebtoken) in httpOnly cookie, bcryptjs for hashing |
-| AI/LLM         | Groq API (Llama 3, free tier), Gemini 1.5 Flash (free-tier fallback) |
-| Database       | MongoDB Atlas (free M0 cluster)                           |
-| Deployment     | Vercel (single project — frontend + API routes)           |
-| CI             | GitHub Actions (build + lint)                              |
+* **Frontend:** Next.js, JavaScript, Tailwind CSS
+* **Visualization:** Recharts, React Flow
+* **Backend:** Next.js API Route Handlers
+* **Database:** MongoDB Atlas
+* **AI:** Google Gemini + Groq
+* **Authentication:** JWT + bcryptjs
+* **Deployment:** Vercel
+* **CI:** GitHub Actions
 
-## Directory Structure
+## Architecture
 
+```text
+Browser
+   |
+   v
+Next.js App
+   |
+   +---- MongoDB Atlas
+   |
+   +---- Google Gemini
+   |
+   +---- Groq
 ```
-hcltech-amplified-r2-project/
-├── app/
-│   ├── api/
-│   │   ├── auth/
-│   │   │   ├── register/route.js
-│   │   │   ├── login/route.js
-│   │   │   └── me/route.js
-│   │   ├── profile/route.js
-│   │   ├── ai/
-│   │   │   ├── parse-goal/route.js
-│   │   │   ├── skill-gap/route.js
-│   │   │   ├── recommend/route.js
-│   │   │   ├── generate-path/route.js
-│   │   │   └── explain/route.js
-│   │   ├── path/
-│   │   │   ├── route.js
-│   │   │   └── generate/route.js
-│   │   ├── progress/route.js
-│   │   └── milestone/[id]/status/route.js
-│   ├── onboarding/page.jsx
-│   ├── roadmap/page.jsx
-│   ├── dashboard/page.jsx
-│   ├── login/page.jsx
-│   ├── register/page.jsx
-│   ├── settings/page.jsx
-│   └── layout.jsx
-│
-├── components/
-│   ├── ChatBubble.jsx
-│   ├── ChatInput.jsx
-│   ├── TypingIndicator.jsx
-│   ├── MilestoneNode.jsx
-│   ├── ProgressRing.jsx
-│   └── Navbar.jsx
-│
-├── lib/
-│   ├── mongodb.js         # cached MongoClient for serverless
-│   ├── auth.js            # JWT + bcrypt helpers, session lookup
-│   ├── llmClient.js        # Groq call + Gemini fallback + JSON parsing
-│   ├── recommender.js      # resource scoring function
-│   ├── skillTaxonomy.js    # topic/prerequisite graph per domain
-│   └── skillGraph.js       # topological sort helper
-│
-├── scripts/
-│   └── seedResources.mjs  # one-time course catalog seeder
-│
-├── middleware.js           # route protection via JWT cookie
-├── docs/
-│   ├── diagrams.md
-│   └── solution-documentation.pdf
-│
-├── PROJECT.md               # step-by-step build plan + AI IDE prompts
-├── team.txt                 # issue/feature breakdown per team member
-├── CURSOR_PROMPT.md          # master prompt for Cursor AI
-├── .env.local.example
-└── README.md
+
+## Project Structure
+
+```text
+app/            Next.js pages and API routes
+components/     Reusable UI components
+lib/            Auth, MongoDB, LLM, recommendation and skill-graph logic
+scripts/        Resource seeding
+docs/           Architecture and solution documentation
 ```
 
 ## Local Setup
 
-### Prerequisites
-- Node.js 18+, npm
-- A free MongoDB Atlas cluster (or local MongoDB)
-- A free Groq API key (and optionally a free Gemini API key as fallback)
-
-### 1. Clone & install
 ```bash
 git clone https://github.com/maheshshinde9100/hcltech-amplified-r2-project.git
 cd hcltech-amplified-r2-project
 npm install
 ```
 
-### 2. Configure environment
-```bash
-cp .env.local.example .env.local
-# fill in MONGODB_URI, JWT_SECRET, GROQ_API_KEY, GEMINI_API_KEY
+Create `.env.local`:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-### 3. Seed the course catalog (one-time)
-```bash
-node scripts/seedResources.mjs
-```
+Run:
 
-### 4. Run
 ```bash
 npm run dev
 ```
