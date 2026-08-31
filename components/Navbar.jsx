@@ -4,9 +4,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: '⚡' },
-  { href: '/roadmap',   label: 'Roadmap',   icon: '🗺️' },
-  { href: '/settings',  label: 'Settings',  icon: '⚙️' },
+  { href: '/dashboard', label: 'Dashboard' },
+  { href: '/roadmap',   label: 'Roadmap' },
+  { href: '/settings',  label: 'Settings' },
 ];
 
 export default function Navbar({ user }) {
@@ -54,7 +54,6 @@ export default function Navbar({ user }) {
             href={item.href}
             className={`nav-link ${pathname === item.href ? 'active' : ''}`}
           >
-            <span>{item.icon}</span>
             {item.label}
           </Link>
         ))}
@@ -87,7 +86,7 @@ export default function Navbar({ user }) {
           style={{ fontSize: '0.85rem' }}
           id="logout-btn"
         >
-          {loading ? <span className="spinner" /> : '↩ Logout'}
+          {loading ? <span className="spinner" /> : 'Logout'}
         </button>
       </div>
     </nav>

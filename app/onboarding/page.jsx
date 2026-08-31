@@ -17,9 +17,9 @@ const STEPS = [
     subtitle: "Be honest — this helps us calibrate your path perfectly.",
     type: 'radio',
     options: [
-      { value: 'beginner',     label: '🌱 Beginner',     desc: 'Just starting out, minimal experience' },
-      { value: 'intermediate', label: '⚡ Intermediate', desc: '1–2 years of coding experience' },
-      { value: 'advanced',     label: '🔥 Advanced',     desc: 'Professional experience, looking to level up' },
+      { value: 'beginner',     label: 'Beginner',     desc: 'Just starting out, minimal experience' },
+      { value: 'intermediate', label: 'Intermediate', desc: '1–2 years of coding experience' },
+      { value: 'advanced',     label: 'Advanced',     desc: 'Professional experience, looking to level up' },
     ],
   },
   {
@@ -28,10 +28,10 @@ const STEPS = [
     subtitle: "We'll prioritize resources that match your preferred style.",
     type: 'radio',
     options: [
-      { value: 'visual',    label: '📹 Visual',    desc: 'Videos, animations, diagrams' },
-      { value: 'reading',   label: '📖 Reading',   desc: 'Articles, documentation, books' },
-      { value: 'hands-on',  label: '💻 Hands-on',  desc: 'Projects, exercises, challenges' },
-      { value: 'mixed',     label: '🎲 Mixed',     desc: 'A balanced combination of all' },
+      { value: 'visual',    label: 'Visual',    desc: 'Videos, animations, diagrams' },
+      { value: 'reading',   label: 'Reading',   desc: 'Articles, documentation, books' },
+      { value: 'hands-on',  label: 'Hands-on',  desc: 'Projects, exercises, challenges' },
+      { value: 'mixed',     label: 'Mixed',     desc: 'A balanced combination of all' },
     ],
   },
   {
@@ -86,7 +86,7 @@ export default function OnboardingPage() {
         if (!profileRes.ok) throw new Error('Failed to save profile');
 
         // 2. Generate AI learning path
-        showToast('🤖 AI is generating your personalized path…', 'info');
+        showToast('AI is generating your personalized path…', 'info');
         const pathRes = await fetch('/api/path/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -95,7 +95,7 @@ export default function OnboardingPage() {
         const pathData = await pathRes.json();
         if (pathData.error) throw new Error(pathData.message);
 
-        showToast('🎉 Your learning path is ready!', 'success');
+        showToast('Your learning path is ready!', 'success');
         setTimeout(() => router.push('/dashboard'), 1000);
       } catch (err) {
         showToast(err.message || 'Something went wrong, please try again.', 'error');
@@ -253,7 +253,7 @@ export default function OnboardingPage() {
               <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
                 {loading
                   ? <><span className="spinner" /> Generating your path…</>
-                  : step === STEPS.length - 1 ? '🚀 Generate My Path' : 'Continue →'
+                  : step === STEPS.length - 1 ? 'Generate My Path' : 'Continue →'
                 }
               </span>
             </button>

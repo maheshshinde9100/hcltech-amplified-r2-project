@@ -32,6 +32,7 @@ export async function POST(request) {
     });
     return response;
   } catch (error) {
+    console.error('[/api/auth/register] error:', error);
     return NextResponse.json({ error: true, message: error.message }, { status: 500 });
   }
 }

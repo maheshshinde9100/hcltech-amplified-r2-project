@@ -64,7 +64,9 @@ export default function DashboardPage() {
   const handleMilestoneUpdate = async (milestoneId, newStatus, feedback = '') => {
     setUpdatingId(milestoneId);
     try {
-      const res = await fetch(`/api/milestone/${milestoneId}/status`, {
+      // Use milestone ID if available, otherwise use the index
+      const apiId = milestoneId || milestones.findIndex(m => m.id === milestoneId);
+      const res = await fetch(`/api/milestone/${apiId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, feedback }),
@@ -73,7 +75,7 @@ export default function DashboardPage() {
       if (data.error) throw new Error(data.message);
 
       if (data.reGenerated) {
-        showToast('🎯 Path has been adaptively regenerated for you!', 'info');
+        showToast('Path has been adaptively regenerated for you!', 'info');
         const pathRes = await fetch('/api/path');
         const pathData = await pathRes.json();
         setPath(pathData.path);
@@ -89,7 +91,7 @@ export default function DashboardPage() {
           ),
         }));
         setProgress(p => ({ ...p, progressPercent: data.progressPercent }));
-        showToast(newStatus === 'completed' ? '🎉 Milestone completed!' : '📌 Status updated', 'success');
+        showToast(newStatus === 'completed' ? 'Milestone completed!' : 'Status updated', 'success');
       }
     } catch (e) {
       showToast(e.message, 'error');
@@ -127,11 +129,10 @@ export default function DashboardPage() {
       <div style={{ minHeight: '100vh' }}>
         <Navbar user={user} />
         <div style={{ paddingTop: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', flexDirection: 'column', gap: 20 }}>
-          <div style={{ fontSize: 60 }}>🗺️</div>
           <h2 className="font-display" style={{ fontSize: '1.6rem', fontWeight: 700 }}>No learning path yet</h2>
           <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: 400 }}>Complete the onboarding to generate your personalized AI learning path.</p>
           <button className="btn-primary" onClick={() => router.push('/onboarding')} id="go-to-onboarding">
-            <span style={{ position: 'relative', zIndex: 1 }}>🚀 Start Onboarding</span>
+            <span style={{ position: 'relative', zIndex: 1 }}>Start Onboarding</span>
           </button>
         </div>
       </div>
@@ -154,9 +155,9 @@ export default function DashboardPage() {
           <p style={{ color: 'var(--text-secondary)', maxWidth: 600, fontSize: '0.95rem' }}>{path.description}</p>
 
           <div style={{ marginTop: 20, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <span className="badge badge-primary">🗺 {path.domain}</span>
-            <span className="badge badge-info">⏱ ~{path.totalEstimatedWeeks} weeks</span>
-            <span className="badge badge-success">📌 {milestones.length} milestones</span>
+            <span className="badge badge-primary">{path.domain}</span>
+            <span className="badge badge-info">~{path.totalEstimatedWeeks} weeks</span>
+            <span className="badge badge-success">{milestones.length} milestones</span>
             <button className="btn-secondary" style={{ padding: '4px 14px', fontSize: '0.8rem' }} onClick={() => router.push('/roadmap')} id="view-roadmap-btn">
               View Roadmap →
             </button>
@@ -317,7 +318,7 @@ export default function DashboardPage() {
                             onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
                             onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
                           >
-                            {r.type === 'video' ? '▶' : r.type === 'course' ? '🎓' : r.type === 'project' ? '🛠' : '📄'} {r.title?.slice(0, 30)}
+                            {r.type === 'video' ? 'Video' : r.type === 'course' ? 'Course' : r.type === 'project' ? 'Project' : 'Article'}: {r.title?.slice(0, 30)}
                           </a>
                         ))}
                       </div>
@@ -335,9 +336,9 @@ export default function DashboardPage() {
                           onChange={e => {
                             if (e.target.value === 'struggling') {
                               const fb = prompt("What are you struggling with? (e.g. 'too hard', 'need more basics')");
-                              if (fb !== null) handleMilestoneUpdate(m.id, e.target.value, fb);
+                              if (fb !== null) handleMilestoneUpdate(m.id || i, e.target.value, fb);
                             } else {
-                              handleMilestoneUpdate(m.id, e.target.value);
+                              handleMilestoneUpdate(m.id || i, e.target.value);
                             }
                           }}
                           style={{
@@ -349,7 +350,7 @@ export default function DashboardPage() {
                           <option value="not_started">Not Started</option>
                           <option value="in_progress">In Progress</option>
                           <option value="completed">Completed</option>
-                          <option value="struggling">🆘 Struggling</option>
+                          <option value="struggling">Struggling</option>
                         </select>
                       )
                     }

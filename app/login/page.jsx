@@ -27,7 +27,7 @@ export default function LoginPage() {
       });
       const data = await res.json();
       if (data.error) throw new Error(data.message);
-      showToast('Welcome back! 👋', 'success');
+      showToast('Welcome back!', 'success');
       router.push('/dashboard');
     } catch (err) {
       showToast(err.message, 'error');
@@ -49,12 +49,6 @@ export default function LoginPage() {
 
       <div style={{ width: '100%', maxWidth: 460, position: 'relative' }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16, margin: '0 auto 20px',
-            background: 'linear-gradient(135deg,#48CAE4,#6C63FF)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 26, boxShadow: '0 8px 32px rgba(72,202,228,0.35)',
-          }}>🎯</div>
           <h1 className="font-display gradient-text" style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 8 }}>
             Welcome Back
           </h1>
