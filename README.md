@@ -6,8 +6,12 @@ Describe your learning goal in plain English. Get a personalized, explainable, p
 
 - **Repository:** https://github.com/maheshshinde9100/hcltech-amplified-r2-project
 - **Live Application:** https://hcltechamplifiedhackathon.vercel.app/
+- **Video Demonstration:** https://www.youtube.com/watch?v=lYVOkW14phU
 
 ---
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/b8f39cfb-ff0e-4bc3-bee4-c8e457fa5357" />
+
 
 ## Problem
 
