@@ -10,6 +10,9 @@ Describe your learning goal in plain English. Get a personalized, explainable, p
 
 ---
 
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/b8f39cfb-ff0e-4bc3-bee4-c8e457fa5357" />
+
+
 ## Problem
 
 Online learning platforms provide a large number of courses, but learners often struggle to identify:
